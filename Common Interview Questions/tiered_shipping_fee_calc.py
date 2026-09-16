@@ -46,58 +46,71 @@ Expected output:
 
 255
 '''
-
-def tiered_cost(orders, rates):
-    #create a rate map with all the rates and their costs at each tier
-    '''
-    {
-    productA: {0:0,10:5, 50:3, 100:2}
-    }
-    '''
+def shipping_fee_calc(orders, rates):
     rate_map = {}
-    for r in rates:
-        r = r.split(',')
-        
-        product_name = r[0]
-        tier_start = r[1]
-        tier_end = r[2]
-        cost = r[3]
 
-        if product_name in rate_map:
-            rate_map[product_name][tier_end] = cost
-        else:
-            rate_map[product_name] = {}
-            rate_map[product_name][tier_end] = cost
-    print(rate_map)
-    #find the product in the map
+    for r in rates:
+        r = r.split(",")
+
+        product = r[0]
+        start = int(r[1])
+        end = int(r[2])
+        price = int(r[3])
+
+        if product not in rate_map:
+            rate_map[product] = []
+
+        rate_map[product].append((start, end, price))
+
+    # Make sure tiers are processed in order
+    for product in rate_map:
+        rate_map[product].sort()
+
+    total = 0
+
     for o in orders:
         o = o.split(",")
-        order_num = o[0]
-        country = o[1]
-        product_name = o[2]
+
+        product = o[2]
         quantity = int(o[3])
 
-        keys = rate_map[product_name].keys()
-        
-        output = 0
-        for k in keys:
-            cost = rate_map[product_name][k]
-            quantity -= int(k)
-            if quantity > 0:
-                output += int(k) * int(cost)
-                print(output)
-            if quantity < 0:
-                quantity += int(k)
-                output += int(quantity) * int(cost)
-                print(output)
-    return output
+        if product not in rate_map:
+            return "product not found"
 
-print(tiered_cost([
+        for start, end, price in rate_map[product]:
+
+            if quantity <= 0:
+                break
+
+            tier_size = end - start + 1
+
+            if quantity >= tier_size:
+                total += tier_size * price
+                quantity -= tier_size
+            else:
+                total += quantity * price
+                quantity = 0
+
+    return total
+        
+orders = [
     "o1,US,productA,15",
     "o2,US,productA,60"
-], [
+]
+
+rates = [
     "productA,1,10,5",
     "productA,11,50,3",
     "productA,51,100,2"
 ]
-))
+
+print(shipping_fee_calc(orders, rates))
+
+
+'''
+good cases: multiple products, 1 products
+
+bad cases: invalid products, past the last tier, negative numbers
+
+edge cases: past the last tier, 
+'''
