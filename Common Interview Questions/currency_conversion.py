@@ -83,30 +83,43 @@ Output:
 ```
 '''
 
-from collections import deque
+from collections import deque 
 
-def conversion_rate(rates, source, target):
-    # make the dictionary of the rates
-    rate_map = {}
+def currency_conversion(rates, source, target):
+    matrix = {}
+    # create the adjacency matrix
     for r in rates:
-        if r[0] not in rate_map:
-            rate_map[r[0]] = []
-        rate_map[r[0]].append((r[1], r[2]))
-        if r[1] not in rate_map:
-            rate_map[r[1]] = []
-        rate_map[r[1]].append((r[0], 1/r[2]))
+        frm = r[0]
+        to = r[1]
+        amt = r[2]
 
-    #check if circular dependencies / possible
-    rate = 1
+        if frm not in matrix:
+            matrix[frm] = []
+        matrix[frm].append((to, amt))
 
-    def traverse(source):
-        q = deque()
-        visited = []
-        if source in rate_map:
-            q.append(rate_map[source])
-            visited.append(rate_map[source])
-        for i in q:
-            rate *= i[1]
-            traverse(i[0]) 
-            q.pop()
-    traverse(source)
+        if to not in matrix:
+            matrix[to] = []
+        matrix[to].append((frm, 1/amt))
+
+    # go follow through, have visited to avoid circular
+    if source not in matrix:
+        return "source not found"
+
+    if target not in matrix:
+        return "target not found"
+
+    output = 1
+    visited = set(source)
+    q = []
+    
+    def traverse(source, target):
+        if 
+        return
+        
+
+    for m in matrix[source]:
+        to = m[0]
+        amt = m[1]
+        visited.add(to)
+        traverse(to)
+
